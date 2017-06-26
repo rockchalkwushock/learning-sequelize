@@ -7,6 +7,7 @@ Repository for teaching myself the Sequelize ORM with Postgres as my SQL databas
 1. [Installation](http://docs.sequelizejs.com/manual/installation/getting-started.html)
 1. [DataTypes](http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types)
 1. [Validations](http://docs.sequelizejs.com/manual/tutorial/models-definition.html#validations)
+1. [Hooks](http://docs.sequelizejs.com/manual/tutorial/hooks.html)
 
 ### As seen in CLI
 
@@ -275,4 +276,33 @@ body: {
     }
   ]
 }
+```
+
+## Hooks
+
+As seen in the console:
+
+```sh
+beforeValidate
+afterValidate
+beforeCreate
+Executing (default):
+  INSERT INTO "articles" ("slug","title","body","createdAt","updatedAt") VALUES
+  ('some-slug','Some Title','Some body','2017-06-26 14:56:28.136 +00:00','2017-06-26 14:56:28.136 +00:00')
+  RETURNING *;
+afterCreate
+```
+
+Some hooks can take arguments as the `afterCreate` method:
+
+```js
+afterCreate: res => {
+        console.log(
+          `afterCreate: Created article with slug ${res.dataValues.slug}.`
+        )
+      }
+```
+
+```sh
+afterCreate: Created article with slug some-slug.
 ```

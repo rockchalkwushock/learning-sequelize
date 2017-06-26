@@ -12,33 +12,26 @@ const Article = connection.define(
       type: Sequelize.STRING,
       primaryKey: true
     },
-    title: {
-      type: Sequelize.STRING,
-      unique: true,
-      allowNull: false,
-      validate: {
-        len: {
-          args: [10, 150],
-          msg:
-            'Please enter a tile with at least 10 character but no longer than 150.'
-        }
-      }
-    },
-    body: {
-      type: Sequelize.TEXT,
-      defaultValue: 'Text here',
-      validate: {
-        startsWithUpper: bodyVal => {
-          const first = bodyVal.charAt(0)
-          const startsWithUpper = first === first.toUpperCase()
-          if (!startsWithUpper)
-            throw new Error('First letter must be a upper case letter')
-        }
-      }
-    }
+    title: Sequelize.STRING,
+    body: Sequelize.TEXT
   },
   {
-    timestamps: false
+    hooks: {
+      beforeValidate: () => {
+        console.log('beforeValidate')
+      },
+      afterValidate: () => {
+        console.log('afterValidate')
+      },
+      beforeCreate: () => {
+        console.log('beforeCreate')
+      },
+      afterCreate: res => {
+        console.log(
+          `afterCreate: Created article with slug ${res.dataValues.slug}.`
+        )
+      }
+    }
   }
 )
 
@@ -46,11 +39,11 @@ connection
   .sync({
     force: true
   })
-  .then(() =>
+  .then(() => {
     Article.create({
-      title: 'Yeah Yeah Yeah Yeah',
-      slug: 'wibble',
-      body: 'Wobble'
+      slug: 'some-slug',
+      title: 'Some Title',
+      body: 'Some body'
     })
-  )
+  })
   .catch(e => console.log(e))
