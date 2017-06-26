@@ -8,6 +8,7 @@ Repository for teaching myself the Sequelize ORM with Postgres as my SQL databas
 1. [DataTypes](http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types)
 1. [Validations](http://docs.sequelizejs.com/manual/tutorial/models-definition.html#validations)
 1. [Hooks](http://docs.sequelizejs.com/manual/tutorial/hooks.html)
+1. [`pg@7.0.0 update guide`](https://node-postgres.com/guides/upgrading)
 
 ### As seen in CLI
 
@@ -305,4 +306,66 @@ afterCreate: res => {
 
 ```sh
 afterCreate: Created article with slug some-slug.
+```
+
+
+## Other
+
+Sequelize can whitelist user submitted data.
+
+```js
+const Article = connection.define('article', {
+  title: Sequelize.STRING,
+  body: Sequelize.TEXT,
+  approved: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: false,
+  }
+});
+
+connection.sync({ force: true })
+  .then(() => {
+    var req = {
+      body: {
+        approved: true, // maliciously inserted data
+        title: 'Some title',
+        body: 'Some body'
+      }
+    }
+    Article.create(req.body, {
+      fields: ['title', 'body'] // whitelist
+    }).then(insertedArticle => console.log(insertedArticle.dataValues))
+  })
+```
+
+## `bulkCreate`
+
+This is an async method. Also has an options object for whitelisting if needed.
+
+> This is made fast by skipping validation by default to enable validation to still run _slowing_ the performance of the method:
+
+```js
+Model.bulkCreate([...], { validate: true })
+```
+
+It is also possible to tell the method to ignore any duplicated data:
+
+```js
+Model.bulkCreate([...], { ignoreDuplicate: true })
+```
+
+```js
+connection.sync({ force: true })
+  .then(() => {
+    Article.bulkCreate([
+      {
+        title: 'Article 1',
+        body: 'Article 1',
+      },
+      {
+        title: 'Article 2',
+        body: 'Article 2',
+      }
+    ])
+  })
 ```
