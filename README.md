@@ -5,8 +5,8 @@ Repository for teaching myself the Sequelize ORM with Postgres as my SQL databas
 ## Links
 
 1. [Installation](http://docs.sequelizejs.com/manual/installation/getting-started.html)
-1. [DataTypes]()
-1. []()
+1. [DataTypes](http://docs.sequelizejs.com/manual/tutorial/models-definition.html#data-types)
+1. [Validations](http://docs.sequelizejs.com/manual/tutorial/models-definition.html#validations)
 
 ### As seen in CLI
 
@@ -168,4 +168,111 @@ Executing (default):
     and t.relname = 'articles'
   GROUP BY i.relname, ix.indexrelid, ix.indisprimary, ix.indisunique, ix.indkey
   ORDER BY i.relname;
+```
+
+## Example of Error message
+
+This would be returned in the event that we are not abiding by the general validation principles set in the model.
+
+```js
+connection
+  .sync({ force: true })
+  .then(() => {
+    Article.create({
+      title: [1, 2, 3], // defined as type: STRING
+      slug: 'wibble',
+      body: 'wobble'
+    })
+  })
+  .catch(e => console.log(e))
+```
+
+```sh
+SequelizeValidationError: string violation: title cannot be an array or
+ an object
+```
+
+## Validation
+
+This can be obtained using the `validate` key on whatever portion of the model you are wishing to apply custom validation too. Sequelize provides many out-of-the-box validation methods already, but you can create your own as well.
+
+```js
+    title: {
+      type: Sequelize.STRING,
+      unique: true,
+      allowNull: false,
+      validate: {
+        len: [10, 150]
+      }
+```
+
+## After adding validation
+
+```sh
+{
+  name: 'SequelizeValidationError',
+  errors: [
+    ValidationErrorItem {
+      message: 'Validation len on title failed',
+      type: 'Validation error',
+      path: 'title',
+      value: 'purtty',
+      __raw:
+        Error: Validation len on title failed
+    }
+  ]
+}
+```
+
+## After adding custom error message
+
+```sh
+{
+  name: 'SequelizeValidationError',
+  errors: [
+    ValidationErrorItem {
+      message: 'Please enter a tile with at least 10 character but no longer than 150.',
+      type: 'Validation error',
+      path: 'title',
+      value: 'purtty',
+      __raw:
+        Error: Validation len on title failed
+    }
+  ]
+}
+```
+
+> NOTE the default behavior of Sequelize says that if a value has `allowNull: true` no validation will be ran on the value; this holds true even if validation has been set for the value in the model definition.
+
+## Custom Validation
+
+```js
+body: {
+      type: Sequelize.TEXT,
+      defaultValue: 'Text here',
+      validate: {
+        startsWithUpper: bodyVal => {
+          const first = bodyVal.charAt(0)
+          const startsWithUpper = first === first.toUpperCase()
+          if (!startsWithUpper)
+            throw new Error('First letter must be a upper case letter')
+        }
+      }
+    }
+```
+
+```sh
+{
+  name: 'SequelizeValidationError',
+  errors: [
+    ValidationErrorItem {
+      message: 'First letter must be a upper case letter',
+      type: 'Validation error',
+      path: 'body',
+      value: 'wobble',
+      __raw:
+        Error: Validation len on title failed
+    }
+  ]
+}
 ```
