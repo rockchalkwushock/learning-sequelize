@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "Cody Brunner <rockchalkwushock@icloud.com> (https://rcws-development.com)",
-  "repository": "",
+  "repository": "https://github.com/rockchalkwushock/learning-sequelize.git",
   "description": "Repository for teaching myself the Sequelize ORM with Postgres as my SQL database engine.",
   "main": "index.js",
   "scripts": {
